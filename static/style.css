@@ -1,0 +1,140 @@
+* {
+    box-sizing: border-box;
+}
+
+/* PAGE BACKGROUND */
+body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+
+    background-image: url("https://mindmatters.ai/wp-content/uploads/sites/2/2025/07/healthcare-chatbot-and-medical-technology-concept-a-doctor-u-1509889533-stockpack-adobestock-1597x898.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+/* DARK OVERLAY */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    z-index: -1;
+}
+
+/* CHAT CARD */
+.chat-container {
+    width: 1500px;
+    height: 2000px;
+    background: rgba(255,255,255,0.95);
+    border-radius: 18px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column;
+}
+
+/* HEADER */
+.chat-header {
+    background: linear-gradient(90deg, #0077b6, #0096c7);
+    color: white;
+    padding: 30px;
+    font-size: 50px;
+    font-weight: 600;
+    text-align: center;
+    border-radius: 18px 18px 0 0;
+}
+
+/* CHAT AREA */
+.chat-box {
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto;
+    background: #f7fbff;
+}
+
+/* MESSAGES */
+.bot-message,
+.user-message {
+    padding: 22px 26px;
+    margin: 22px 0;
+    border-radius: 16px;
+    max-width: 75%;
+    font-size: 48px;
+}
+
+.bot-message {
+    background: #e3f2fd;
+}
+
+.user-message {
+    background: #0077b6;
+    color: white;
+    margin-left: auto;
+}
+
+/* ================= QUICK BUTTONS (FIXED SIZE 🔥) ================= */
+.quick-buttons {
+    display: flex;
+    gap: 20px;
+    padding: 25px;
+    justify-content: center;
+    flex-wrap: wrap;
+    border-top: 2px solid #ddd;
+    background: #f0f8ff;
+}
+
+.quick-buttons button {
+    padding: 20px 35px;       /* 🔥 BIG BUTTON */
+    font-size: 32px;          /* 🔥 TEXT SIZE */
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    background: #0096c7;
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+}
+
+.quick-buttons button:hover {
+    background: #0077b6;
+    transform: scale(1.05);
+}
+
+/* ================= INPUT AREA ================= */
+.chat-input {
+    display: flex;
+    align-items: center;
+    padding: 30px;
+    border-top: 2px solid #ddd;
+    background: white;
+}
+
+.chat-input input {
+    flex: 1;
+    padding: 30px;
+    font-size: 42px;
+    border-radius: 14px;
+    border: 2px solid #ccc;
+}
+
+.chat-input button {
+    margin-left: 25px;
+    padding: 30px 50px;
+    font-size: 42px;
+    background: #0077b6;
+    color: white;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+}
+
+.chat-input button:hover {
+    background: #023e8a;
+}
