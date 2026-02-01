@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hospital Virtual Assistant</title>
+
+    <!-- Flask static CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="chat-container">
+
+    <!-- HEADER -->
+    <div class="chat-header">
+        🏥 Hospital Virtual Assistant
+    </div>
+
+    <!-- CHAT AREA -->
+    <div class="chat-box" id="chatBox">
+        <div class="bot-message">
+            ⚠️ Disclaimer: This chatbot does not provide medical diagnosis.
+        </div>
+    </div>
+
+    <!-- QUICK ACTION BUTTONS -->
+    <div class="quick-buttons">
+        <button onclick="quickSend('appointment')">Appointment</button>
+        <button onclick="quickSend('billing')">Billing</button>
+        <button onclick="quickSend('insurance')">Insurance</button>
+        <button onclick="quickSend('lab report')">Lab</button>
+        <button onclick="quickSend('emergency')">Emergency</button>
+    </div>
+
+    <!-- INPUT AREA -->
+    <div class="chat-input">
+        <input type="text" id="userInput" placeholder="Type your message..." />
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+</div>
+
+<!-- Flask static JS -->
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
