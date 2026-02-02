@@ -1,26 +1,26 @@
+/* RESET */
 * {
     box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
 /* PAGE BACKGROUND */
 body {
-    margin: 0;
-    padding: 0;
-    height: 100vh;
-
+    min-height: 100vh;
     background-image: url("https://mindmatters.ai/wp-content/uploads/sites/2/2025/07/healthcare-chatbot-and-medical-technology-concept-a-doctor-u-1509889533-stockpack-adobestock-1597x898.jpg");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
     font-family: "Segoe UI", Arial, sans-serif;
+
+    /* ❌ REMOVE FLEX CENTERING */
+    /* display: flex;
+       justify-content: center;
+       align-items: center; */
 }
 
-/* DARK OVERLAY */
+/* DARK OVERLAY (OPTIONAL BUT NICE) */
 body::before {
     content: "";
     position: fixed;
@@ -29,44 +29,48 @@ body::before {
     z-index: -1;
 }
 
-/* CHAT CARD */
+/* CHAT CONTAINER */
 .chat-container {
-    width: 1500px;
-    height: 2000px;
-    background: rgba(255,255,255,0.95);
-    border-radius: 18px;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+    width: 95%;
+    max-width: 500px;
+    height: 65vh;
+    background: white;
+    border-radius: 14px;
     display: flex;
     flex-direction: column;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+
+    /* CENTER HORIZONTALLY + PUSH DOWN */
+    margin: 80px auto;
 }
 
 /* HEADER */
 .chat-header {
-    background: linear-gradient(90deg, #0077b6, #0096c7);
+    background: #0077b6;
     color: white;
-    padding: 30px;
-    font-size: 50px;
-    font-weight: 600;
+    padding: 14px;
+    font-size: 18px;
     text-align: center;
-    border-radius: 18px 18px 0 0;
+    border-radius: 14px 14px 0 0;
 }
 
 /* CHAT AREA */
 .chat-box {
     flex: 1;
-    padding: 30px;
+    padding: 12px;
     overflow-y: auto;
-    background: #f7fbff;
+    background: #f4f9fc;
 }
 
 /* MESSAGES */
 .bot-message,
 .user-message {
-    padding: 22px 26px;
-    margin: 22px 0;
-    border-radius: 16px;
-    max-width: 75%;
-    font-size: 48px;
+    padding: 10px 14px;
+    margin: 8px 0;
+    border-radius: 12px;
+    max-width: 80%;
+    font-size: 14px;
+    line-height: 1.4;
 }
 
 .bot-message {
@@ -79,62 +83,63 @@ body::before {
     margin-left: auto;
 }
 
-/* ================= QUICK BUTTONS (FIXED SIZE 🔥) ================= */
+/* QUICK BUTTONS */
 .quick-buttons {
     display: flex;
-    gap: 20px;
-    padding: 25px;
-    justify-content: center;
+    gap: 8px;
+    padding: 10px;
     flex-wrap: wrap;
-    border-top: 2px solid #ddd;
-    background: #f0f8ff;
+    justify-content: center;
 }
 
 .quick-buttons button {
-    padding: 20px 35px;       /* 🔥 BIG BUTTON */
-    font-size: 32px;          /* 🔥 TEXT SIZE */
-    border-radius: 12px;
+    padding: 8px 14px;
+    font-size: 13px;
+    border-radius: 8px;
     border: none;
-    cursor: pointer;
     background: #0096c7;
     color: white;
-    font-weight: 600;
-    box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+    cursor: pointer;
 }
 
 .quick-buttons button:hover {
-    background: #0077b6;
-    transform: scale(1.05);
+    background: #023e8a;
 }
 
-/* ================= INPUT AREA ================= */
+/* INPUT AREA */
 .chat-input {
     display: flex;
-    align-items: center;
-    padding: 30px;
-    border-top: 2px solid #ddd;
-    background: white;
+    padding: 10px;
+    border-top: 1px solid #ddd;
+    gap: 8px;
 }
 
 .chat-input input {
     flex: 1;
-    padding: 30px;
-    font-size: 42px;
-    border-radius: 14px;
-    border: 2px solid #ccc;
+    padding: 10px;
+    font-size: 14px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
 }
 
 .chat-input button {
-    margin-left: 25px;
-    padding: 30px 50px;
-    font-size: 42px;
+    padding: 10px 18px;
+    font-size: 14px;
+    border-radius: 8px;
+    border: none;
     background: #0077b6;
     color: white;
-    border: none;
-    border-radius: 14px;
     cursor: pointer;
 }
 
 .chat-input button:hover {
     background: #023e8a;
+}
+
+/* MOBILE FIX */
+@media (max-width: 600px) {
+    .chat-container {
+        height: 75vh;
+        margin: 40px auto;
+    }
 }
