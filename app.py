@@ -3,19 +3,23 @@ import pickle
 import sqlite3
 import random
 import os
+import threading
 
 app = Flask(__name__)
 
 # ================= LOAD AI MODEL =================
-with open("chatbot_model.pkl", "rb") as f:
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+MODEL_PATH = os.path.join(BASE_DIR, "chatbot_model.pkl")
+with open(MODEL_PATH, "rb") as f:
     vectorizer, model = pickle.load(f)
 
-# ================= DATABASE (RENDER SAFE) =================
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# ================= DATABASE (RENDER SAFE SQLITE) =================
 DB_PATH = os.path.join(BASE_DIR, "appointments.db")
 
 conn = sqlite3.connect(DB_PATH, check_same_thread=False)
 cur = conn.cursor()
+
 cur.execute("""
 CREATE TABLE IF NOT EXISTS appointments (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -26,6 +30,8 @@ CREATE TABLE IF NOT EXISTS appointments (
 """)
 conn.commit()
 
+db_lock = threading.Lock()
+
 # ================= APPOINTMENT STATE =================
 appointment_state = {
     "step": None,   # None | name | date | time
@@ -33,7 +39,7 @@ appointment_state = {
     "date": ""
 }
 
-# ================= MULTIPLE RESPONSES =================
+# ================= RESPONSES =================
 responses = {
     "greeting": [
         "Hello 😊 I’m your hospital virtual assistant. How can I help you?",
@@ -52,16 +58,13 @@ responses = {
         "⏰ Hospital visiting hours are from 10 AM to 7 PM."
     ],
     "billing": [
-        "💳 Billing counter is located near the main reception.",
-        "💰 Please visit the billing desk beside OPD."
+        "💳 Billing counter is located near the main reception."
     ],
     "insurance": [
-        "🛡️ Insurance desk assists with all health insurance claims.",
-        "📄 Please contact the insurance help desk near reception."
+        "🛡️ Insurance desk assists with all health insurance claims."
     ],
     "lab_reports": [
-        "🧪 Lab reports can be collected from the diagnostics department.",
-        "📑 Test results are available at the lab counter."
+        "🧪 Lab reports can be collected from the diagnostics department."
     ],
     "pharmacy": [
         "💊 Pharmacy is open 24/7 on the ground floor."
@@ -95,15 +98,16 @@ def chatbot_reply(message):
         name = appointment_state["name"]
         date = appointment_state["date"]
 
-        cur.execute(
-            "INSERT INTO appointments (name, date, time) VALUES (?, ?, ?)",
-            (name, date, time)
-        )
-        conn.commit()
+        with db_lock:
+            cur.execute(
+                "INSERT INTO appointments (name, date, time) VALUES (?, ?, ?)",
+                (name, date, time)
+            )
+            conn.commit()
 
         appointment_state.update({"step": None, "name": "", "date": ""})
 
-        return f"✅ Appointment successfully booked for **{name}** on **{date}** at **{time}**."
+        return f"✅ Appointment booked for **{name}** on **{date}** at **{time}**."
 
     if appointment_state["step"] == "date":
         appointment_state["date"] = message
@@ -115,11 +119,9 @@ def chatbot_reply(message):
         appointment_state["step"] = "date"
         return "📅 Please tell your preferred appointment date (DD-MM-YYYY)."
 
-    # -------- KEYWORD OVERRIDE --------
-    for key in ["thanks", "thank you"]:
-        if key in message:
-            return random.choice(responses["thanks"])
-
+    # -------- KEYWORDS --------
+    if "thank" in message:
+        return random.choice(responses["thanks"])
     if "bye" in message:
         return random.choice(responses["bye"])
     if "billing" in message:
