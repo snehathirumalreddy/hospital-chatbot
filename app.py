@@ -1,9 +1,8 @@
 from flask import Flask, render_template, request, jsonify
 import pickle
-import sqlite3
 import random
 import os
-import threading
+import psycopg2
 
 app = Flask(__name__)
 
@@ -14,23 +13,31 @@ MODEL_PATH = os.path.join(BASE_DIR, "chatbot_model.pkl")
 with open(MODEL_PATH, "rb") as f:
     vectorizer, model = pickle.load(f)
 
-# ================= DATABASE (RENDER SAFE SQLITE) =================
-DB_PATH = os.path.join(BASE_DIR, "appointments.db")
+# ================= DATABASE (RENDER POSTGRES) =================
+DB_HOST = os.environ.get("DB_HOST")
+DB_NAME = os.environ.get("DB_NAME")
+DB_USER = os.environ.get("DB_USER")
+DB_PASSWORD = os.environ.get("DB_PASSWORD")
+DB_PORT = os.environ.get("DB_PORT", "5432")
 
-conn = sqlite3.connect(DB_PATH, check_same_thread=False)
+conn = psycopg2.connect(
+    host=DB_HOST,
+    database=DB_NAME,
+    user=DB_USER,
+    password=DB_PASSWORD,
+    port=DB_PORT
+)
 cur = conn.cursor()
 
 cur.execute("""
 CREATE TABLE IF NOT EXISTS appointments (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     name TEXT,
     date TEXT,
     time TEXT
 )
 """)
 conn.commit()
-
-db_lock = threading.Lock()
 
 # ================= APPOINTMENT STATE =================
 appointment_state = {
@@ -43,16 +50,10 @@ appointment_state = {
 responses = {
     "greeting": [
         "Hello 😊 I’m your hospital virtual assistant. How can I help you?",
-        "Hi 👋 Welcome to our hospital. How may I assist you today?",
-        "Hello! 😊 Please tell me how I can help you."
-    ],
-    "how_are_you": [
-        "I’m doing great 😊 Thanks for asking!",
-        "I’m good 😊 How can I help you today?"
+        "Hi 👋 Welcome to our hospital. How may I assist you today?"
     ],
     "doctor": [
-        "👨‍⚕️ Doctors are available from 9 AM to 5 PM.",
-        "🩺 Please tell me which department doctor you are looking for."
+        "👨‍⚕️ Doctors are available from 9 AM to 5 PM."
     ],
     "timings": [
         "⏰ Hospital visiting hours are from 10 AM to 7 PM."
@@ -69,22 +70,14 @@ responses = {
     "pharmacy": [
         "💊 Pharmacy is open 24/7 on the ground floor."
     ],
-    "icu": [
-        "🏥 ICU is available with 24/7 monitoring."
-    ],
-    "ambulance": [
-        "🚑 Ambulance service is available 24/7."
-    ],
     "emergency": [
-        "🚨 Emergency services are available 24/7. Please go to emergency ward immediately."
+        "🚨 Emergency services are available 24/7."
     ],
     "thanks": [
-        "You’re welcome 😊 Stay healthy!",
-        "Happy to help 😊 Take care!"
+        "You’re welcome 😊 Stay healthy!"
     ],
     "bye": [
-        "Goodbye 👋 Take care!",
-        "Bye 😊 Wishing you good health!"
+        "Goodbye 👋 Take care!"
     ]
 }
 
@@ -98,12 +91,11 @@ def chatbot_reply(message):
         name = appointment_state["name"]
         date = appointment_state["date"]
 
-        with db_lock:
-            cur.execute(
-                "INSERT INTO appointments (name, date, time) VALUES (?, ?, ?)",
-                (name, date, time)
-            )
-            conn.commit()
+        cur.execute(
+            "INSERT INTO appointments (name, date, time) VALUES (%s, %s, %s)",
+            (name, date, time)
+        )
+        conn.commit()
 
         appointment_state.update({"step": None, "name": "", "date": ""})
 
@@ -128,7 +120,7 @@ def chatbot_reply(message):
         return random.choice(responses["billing"])
     if "insurance" in message:
         return random.choice(responses["insurance"])
-    if "lab" in message or "report" in message:
+    if "lab" in message:
         return random.choice(responses["lab_reports"])
     if "emergency" in message:
         return random.choice(responses["emergency"])
@@ -136,10 +128,6 @@ def chatbot_reply(message):
         return random.choice(responses["doctor"])
     if "pharmacy" in message:
         return random.choice(responses["pharmacy"])
-    if "icu" in message:
-        return random.choice(responses["icu"])
-    if "ambulance" in message:
-        return random.choice(responses["ambulance"])
 
     # -------- AI INTENT --------
     X = vectorizer.transform([message])
@@ -152,7 +140,7 @@ def chatbot_reply(message):
     if intent in responses:
         return random.choice(responses[intent])
 
-    return "❓ Sorry, I didn’t understand your query. Please try again."
+    return "❓ Sorry, I didn’t understand your query."
 
 # ================= ROUTES =================
 @app.route("/")
@@ -165,7 +153,7 @@ def chat():
     reply = chatbot_reply(data.get("message", ""))
     return jsonify({"reply": reply})
 
-# ================= RUN (RENDER COMPATIBLE) =================
+# ================= RUN =================
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
